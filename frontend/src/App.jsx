@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useShipments } from './hooks/useShipments';
 import Dashboard from './components/Dashboard';
-// import RouteOptimizer from './components/RouteOptimizer';
+import RouteOptimizer from './components/RouteOptimizer';
 import QuantityManager from './components/QuantityManager';
 import Financial from './components/Financial';
 import AddShipmentModal from './components/AddShipmentModal';
@@ -9,7 +9,7 @@ import './App.css';
 
 const TABS = [
   { id: 'dashboard', label: 'DASHBOARD' },
-  // { id: 'route',     label: 'ROUTE OPTIMIZER' },
+  { id: 'route',     label: 'ROUTE OPTIMIZER' },
   { id: 'quantity',  label: 'QUANTITY MGR' },
   { id: 'financial', label: 'FINANCIAL' },
 ];
@@ -109,9 +109,9 @@ export default function App() {
             onRemove={removeShipment}
           />
         )}
-        {/* {tab === 'route' && (
+        {tab === 'route' && (
           <RouteOptimizer shipments={shipments} defaultShipId={selectedId} />
-        )} */}
+        )}
         {tab === 'quantity' && (
           <QuantityManager shipments={shipments} onUpdate={updateQty} onAdd={() => setShowAdd(true)} />
         )}

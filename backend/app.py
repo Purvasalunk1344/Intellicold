@@ -9,11 +9,13 @@ from fastapi.middleware.cors import CORSMiddleware
 import sqlite3, os, sys, random
 from datetime import datetime
 import uvicorn
+from typing import Optional
+from pydantic import BaseModel
 
 # ── Import ML modules ──
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ml_model'))
-from predict import predict
-from decision_engine import get_actions, prioritize_shipments
+from ml_model.predict import predict
+from ml_model.decision_engine import get_actions, prioritize_shipments
 
 app = FastAPI()
 
@@ -27,6 +29,18 @@ app.add_middleware(
 )
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'sensor_data.db')
+
+# ── Route Optimization Models ──
+class RouteRequest(BaseModel):
+    origin: str
+    destination: str
+    shipment_id: Optional[str] = None
+    vehicle_type: Optional[str] = "reefer_truck"
+    distance_km: Optional[float] = 0
+
+class EmissionRequest(BaseModel):
+    distance_km: float
+    vehicle_type: str = "reefer_truck"
 
 # ── Database functions (keep same) ──
 def init_db():
@@ -197,6 +211,157 @@ async def status():
 @app.get("/api/v1/map/emission")
 async def get_emissions():
     return {"status": "success", "data": {"emission": 0, "route": []}}
+
+# ── Route Optimization Endpoints ──
+
+@app.post("/api/route/optimize")
+async def optimize_route(request: RouteRequest):
+    """
+    Calculate optimized route between origin and destination
+    Returns distance, time, and recommended route
+    """
+    origin = request.origin
+    destination = request.destination
+    vehicle_type = request.vehicle_type
+    
+    # Simple distance calculation (you can integrate OpenRouteService API here)
+    # For now, using demo data
+    distance_km = request.distance_km or 500
+    
+    # Vehicle speed mapping
+    speed_map = {
+        'reefer_truck': 65,
+        'insulated_van': 55,
+        'open_truck': 70
+    }
+    speed = speed_map.get(vehicle_type, 60)
+    
+    # Calculate estimated time
+    estimated_hours = round(distance_km / speed, 1)
+    
+    # Calculate fuel and emissions
+    fuel_consumption_per_km = {
+        'reefer_truck': 0.35,   # liters per km
+        'insulated_van': 0.28,
+        'open_truck': 0.40
+    }.get(vehicle_type, 0.35)
+    
+    fuel_liters = round(distance_km * fuel_consumption_per_km, 2)
+    co2_kg = round(fuel_liters * 2.68, 2)  # 1 liter diesel = 2.68 kg CO2
+    
+    return {
+        "status": "success",
+        "data": {
+            "origin": origin,
+            "destination": destination,
+            "distance_km": distance_km,
+            "estimated_hours": estimated_hours,
+            "vehicle_type": vehicle_type,
+            "fuel_liters": fuel_liters,
+            "co2_emission_kg": co2_kg,
+            "route_waypoints": [
+                {"name": origin, "lat": 0, "lng": 0},
+                {"name": destination, "lat": 0, "lng": 0}
+            ],
+            "alternative_routes": []
+        }
+    }
+
+@app.post("/api/v1/map/emission")
+async def calculate_emission(request: EmissionRequest):
+    """
+    Calculate CO2 emissions for a given distance and vehicle type
+    """
+    distance_km = request.distance_km
+    vehicle_type = request.vehicle_type
+    
+    # Emission factors (kg CO2 per km)
+    emission_factors = {
+        'reefer_truck': 0.95,   # Higher due to refrigeration
+        'insulated_van': 0.75,
+        'open_truck': 1.05      # Worst efficiency
+    }
+    
+    emission_factor = emission_factors.get(vehicle_type, 0.85)
+    total_emission = round(distance_km * emission_factor, 2)
+    
+    return {
+        "status": "success",
+        "data": {
+            "emission": total_emission,
+            "distance_km": distance_km,
+            "vehicle_type": vehicle_type,
+            "emission_factor": emission_factor
+        }
+    }
+
+@app.get("/api/v1/map/emission")
+async def get_emission_info():
+    """
+    GET endpoint for emission info (for compatibility)
+    """
+    return {
+        "status": "success",
+        "data": {
+            "emission": 0,
+            "route": [],
+            "message": "Use POST method to calculate emissions"
+        }
+    }
+
+@app.get("/api/route/cities")
+async def get_cities():
+    """
+    Get list of available Indian cities for route planning
+    """
+    cities = [
+        'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune',
+        'Ahmedabad', 'Jaipur', 'Surat', 'Lucknow', 'Kanpur', 'Nagpur', 'Indore',
+        'Bhopal', 'Visakhapatnam', 'Nashik', 'Anand', 'Ratnagiri', 'Amritsar',
+        'Vadodara', 'Rajkot', 'Coimbatore', 'Madurai', 'Patna', 'Ranchi', 'Kochi',
+    ]
+    return {"status": "success", "data": cities}
+
+@app.post("/api/route/priority")
+async def get_priority_routes(shipment_ids: list):
+    """
+    Get optimized delivery sequence for multiple shipments
+    Based on risk level and remaining shelf life
+    """
+    # Get shipments data
+    all_shipments = []
+    for ship in DEMO_SHIPMENTS:
+        sid = ship['id']
+        if sid not in shipment_ids:
+            continue
+        
+        state = sim_state.get(sid, {})
+        pred = predict(state)
+        
+        all_shipments.append({
+            "id": sid,
+            "name": ship['name'],
+            "origin": ship['origin'],
+            "destination": ship['destination'],
+            "distance_km": ship['distance_km'],
+            "risk_index": pred['risk_index'],
+            "hours_to_spoilage": pred['hours_to_spoilage'],
+            "quality_remaining": pred['quality_remaining']
+        })
+    
+    # Sort by priority (highest risk first)
+    sorted_shipments = sorted(all_shipments, 
+                             key=lambda x: (x['risk_index'], -x['hours_to_spoilage']), 
+                             reverse=True)
+    
+    return {
+        "status": "success",
+        "data": {
+            "priority_sequence": sorted_shipments,
+            "total_distance": sum(s['distance_km'] for s in sorted_shipments),
+            "critical_count": sum(1 for s in sorted_shipments if s['risk_index'] >= 3)
+        }
+    }
 
 # ── START SERVER ──
 if __name__ == '__main__':
