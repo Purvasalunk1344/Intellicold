@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { PRODUCT_CONFIG, VEHICLE_CONFIG } from '../data/constants';
-import './QuantityManager.css';
+// import './QuantityManager.css';
 
 const RISK_COLOR = { Low: '#00e676', Medium: '#ffca28', High: '#ff6d00', Critical: '#ff1744' };
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { PRODUCT_CONFIG, VEHICLE_CONFIG, INDIAN_CITIES } from '../data/constants';
-import './AddShipmentModal.css';
+// import './AddShipmentModal.css';
 
 export default function AddShipmentModal({ onAdd, onClose, existingCount }) {
   const [form, setForm] = useState({

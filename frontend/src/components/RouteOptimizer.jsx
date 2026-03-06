@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PRODUCT_CONFIG, VEHICLE_CONFIG, CITY_GRAPH } from '../data/constants';
-import './RouteOptimizer.css';
+// import './RouteOptimizer.css';
 
 const OBJECTIVES = [
   { value: 'balanced', label: 'Balanced (Risk + Time)' },
