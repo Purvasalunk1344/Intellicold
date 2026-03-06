@@ -1,0 +1,88 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { DEMO_SHIPMENTS } from '../data/constants';
+
+const API = 'http://localhost:5000/api';
+
+export function useShipments() {
+  const [shipments,   setShipments]   = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [online,      setOnline]      = useState(false);
+  const [lastUpdate,  setLastUpdate]  = useState(null);
+  const qtyOverrides = useRef({});
+
+  const applyOverrides = useCallback((data) => {
+    return data.map(s => ({
+      ...s,
+      qty_kg:       qtyOverrides.current[s.id]?.qty_kg       ?? s.qty_kg       ?? 500,
+      value_per_kg: qtyOverrides.current[s.id]?.value_per_kg ?? s.value_per_kg ?? 200,
+    }));
+  }, []);
+
+  const fetch_ = useCallback(async () => {
+    try {
+      const res  = await fetch(`${API}/shipments`, { signal: AbortSignal.timeout(4000) });
+      const data = await res.json();
+      setShipments(applyOverrides(data));
+      setOnline(true);
+      setLastUpdate(new Date());
+    } catch {
+      if (!online) {
+        setShipments(applyOverrides(DEMO_SHIPMENTS));
+        setOnline(false);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [online, applyOverrides]);
+
+  useEffect(() => {
+    fetch_();
+    const id = setInterval(fetch_, 5000);
+    return () => clearInterval(id);
+  }, [fetch_]);
+
+  const updateQty = useCallback((shipId, qty, val) => {
+    qtyOverrides.current[shipId] = { qty_kg: qty, value_per_kg: val };
+    setShipments(prev =>
+      prev.map(s => s.id === shipId ? { ...s, qty_kg: qty, value_per_kg: val } : s)
+    );
+  }, []);
+
+  const addShipment = useCallback((ship) => {
+    setShipments(prev => [...prev, ship]);
+  }, []);
+
+  const removeShipment = useCallback((id) => {
+    setShipments(prev => prev.filter(s => s.id !== id));
+  }, []);
+
+  const injectSpike = useCallback(async (shipId) => {
+    try {
+      await fetch(`${API}/simulate/spike/${shipId}`, { method: 'POST' });
+      setTimeout(fetch_, 600);
+    } catch {
+      setShipments(prev => prev.map(s => {
+        if (s.id !== shipId) return s;
+        const newRisk = Math.min(3, s.risk_index + 1);
+        return {
+          ...s,
+          quality_remaining: Math.max(0,  s.quality_remaining  - 18),
+          hours_to_spoilage: Math.max(0,  s.hours_to_spoilage  - 6),
+          risk_index:  newRisk,
+          risk_level:  ['Low', 'Medium', 'High', 'Critical'][newRisk],
+          features: s.features ? {
+            ...s.features,
+            avg_temp_c:               s.features.avg_temp_c               + 6.5,
+            cumulative_damage_index:  s.features.cumulative_damage_index  + 1.4,
+            temp_deviation_degree_hr: s.features.temp_deviation_degree_hr + 32,
+          } : s.features,
+        };
+      }));
+    }
+  }, [fetch_]);
+
+  return {
+    shipments, loading, online, lastUpdate,
+    updateQty, addShipment, removeShipment, injectSpike,
+  };
+}
