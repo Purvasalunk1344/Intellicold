@@ -4,7 +4,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts';
 import { PRODUCT_CONFIG, VEHICLE_CONFIG } from '../data/constants';
-// import './Dashboard.css';
+import './Dashboard.css';
 
 const RISK_COLOR = { Low: '#00e676', Medium: '#ffca28', High: '#ff6d00', Critical: '#ff1744' };
 

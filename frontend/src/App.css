@@ -136,7 +136,7 @@ body::after {
 .scard-sub { font-size: 9px; color: var(--dim); margin-top: 4px; }
 
 /* ── MAIN CONTENT ── */
-.main-content { }
+/* .main-content { } */
 
 /* ── PANELS ── */
 .panel {

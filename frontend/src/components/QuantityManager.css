@@ -1,0 +1,80 @@
+.qty-layout { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── SUMMARY BAR ── */
+.qty-summary-bar {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+}
+.qty-sum-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px;
+}
+
+/* ── QUANTITY GRID ── */
+.qty-grid { display: flex; flex-direction: column; gap: 10px; }
+
+.qty-row {
+  display: grid;
+  grid-template-columns: 1fr 200px auto;
+  gap: 16px; align-items: center;
+  background: rgba(0,0,0,0.25); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px;
+  transition: border-color 0.18s;
+}
+.qty-row:hover { border-color: var(--border2); }
+
+/* ── IDENTITY COLUMN ── */
+.qty-identity { display: flex; gap: 12px; align-items: flex-start; }
+.qty-icon     { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+.qty-name     { font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 2px; }
+.qty-sub      { font-size: 9px; color: var(--dim); }
+.qty-qbar-bg  {
+  height: 3px; border-radius: 2px;
+  background: rgba(255,255,255,0.05);
+  overflow: hidden; margin-top: 7px;
+}
+.qty-qbar-fg  { height: 100%; border-radius: 2px; transition: width 0.8s ease; }
+
+/* ── FINANCE COLUMN ── */
+.qty-finance {
+  display: flex; flex-direction: column; gap: 6px;
+  border-left: 1px solid var(--border); padding-left: 16px;
+}
+.qty-fin-row {
+  display: flex; justify-content: space-between;
+  align-items: center; gap: 10px;
+}
+
+/* ── CONTROLS COLUMN ── */
+.qty-controls { display: flex; gap: 14px; }
+.qty-field    { display: flex; flex-direction: column; align-items: center; }
+
+/* ── SPINNER ── */
+.qty-spinner {
+  display: flex; align-items: center;
+  border: 1px solid var(--border); border-radius: 5px; overflow: hidden;
+}
+.spin-btn {
+  background: var(--panel2); border: none; color: var(--accent);
+  width: 30px; height: 32px; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s; font-family: var(--font-mono);
+}
+.spin-btn:hover { background: rgba(0,200,240,0.18); }
+
+.spin-inp {
+  width: 60px; text-align: center;
+  background: var(--bg2); border: none;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  color: var(--white); font-family: var(--font-display);
+  font-size: 13px; padding: 5px 0; outline: none; height: 32px;
+}
+.spin-inp::-webkit-inner-spin-button,
+.spin-inp::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1100px) {
+  .qty-row         { grid-template-columns: 1fr; }
+  .qty-finance     { border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 10px; }
+  .qty-summary-bar { grid-template-columns: 1fr 1fr; }
+}

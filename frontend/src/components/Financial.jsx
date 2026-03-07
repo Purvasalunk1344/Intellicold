@@ -3,7 +3,7 @@ import {
   PieChart, Pie, Cell, Legend
 } from 'recharts';
 import { PRODUCT_CONFIG } from '../data/constants';
-// import './Financial.css';
+import './Financial.css';
 
 const RISK_COLORS = ['#00e676', '#ffca28', '#ff6d00', '#ff1744'];
 const RISK_NAMES  = ['Low', 'Medium', 'High', 'Critical'];

@@ -1,0 +1,44 @@
+.fin-layout { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── KPI ROW ── */
+.fin-kpi-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.fin-kpi {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 8px; padding: 16px;
+}
+.fin-kpi-label {
+  font-size: 8px; color: var(--dim);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+}
+.fin-kpi-val {
+  font-family: var(--font-display);
+  font-size: 26px; font-weight: 700; line-height: 1;
+}
+.fin-kpi-sub { font-size: 9px; color: var(--dim); margin-top: 4px; }
+
+/* ── CHARTS ROW ── */
+.fin-charts-row {
+  display: grid; grid-template-columns: 2fr 1fr; gap: 14px;
+}
+
+/* ── BOTTOM ROW ── */
+.fin-bottom-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+
+/* ── INTELLICOLD SAVINGS BOX ── */
+.intellicold-savings {
+  margin-top: 16px; padding: 14px;
+  background: rgba(0,200,240,0.05);
+  border: 1px solid rgba(0,200,240,0.2);
+  border-radius: 6px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1000px) {
+  .fin-kpi-row    { grid-template-columns: 1fr 1fr; }
+  .fin-charts-row { grid-template-columns: 1fr; }
+  .fin-bottom-row { grid-template-columns: 1fr; }
+}
