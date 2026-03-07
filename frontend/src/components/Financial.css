@@ -5,7 +5,7 @@
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
 }
 .fin-kpi {
-  background: var(--panel); border: 1px solid var(--border);
+  background: var(--bg-card); border: 1px solid var(--border);
   border-radius: 8px; padding: 16px;
 }
 .fin-kpi-label {

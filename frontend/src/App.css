@@ -239,3 +239,414 @@ body::after {
   .tab-nav { flex-wrap: wrap; }
   .header { flex-direction: column; align-items: flex-start; }
 }
+
+/* ========== THEME VARIABLES ========== */
+
+/* Dark Theme (Default) */
+:root[data-theme="dark"] {
+  --bg-primary: #03080f;
+  --bg-secondary: #0a1828;
+  --bg-card: #0f2437;
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-dim: #64748b;
+  --border: #1e3a52;
+  --accent: #00c8f0;
+  --safe: #00e676;
+  --medium: #ffca28;
+  --high: #ff6d00;
+  --critical: #ff1744;
+}
+
+/* Light Theme */
+:root[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-dim: #94a3b8;
+  --border: #e2e8f0;
+  --accent: #0ea5e9;
+  --safe: #22c55e;
+  --medium: #f59e0b;
+  --high: #f97316;
+  --critical: #ef4444;
+}
+
+/* Apply theme colors to body */
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.panel, .ship-card, .scard {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+/* Theme Toggle Button Style */
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Update all existing color references */
+.header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-strip {
+  background: var(--bg-secondary);
+}
+
+.data-table {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.data-table th {
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table td {
+  border-bottom: 1px solid var(--border);
+}
+
+/* Charts need theme awareness too */
+.recharts-text {
+  fill: var(--text-secondary);
+}
+
+.recharts-cartesian-grid line {
+  stroke: var(--border);
+}
+
+/* ============================================
+   LIGHT/DARK MODE THEME STYLES
+   ============================================ */
+
+/* Default Dark Mode Variables */
+:root {
+  --bg-primary: #03080f;
+  --bg-secondary: #0a1828;
+  --bg-card: #0f2437;
+  --bg-hover: #1a3a52;
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-dim: #64748b;
+  --border: #1e3a52;
+  --accent: #00c8f0;
+  --safe: #00e676;
+  --medium: #ffca28;
+  --high: #ff6d00;
+  --critical: #ff1744;
+}
+
+/* Light Mode - Applied when body has 'light-mode' class */
+body.light-mode {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #f1f5f9;
+  --bg-hover: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-dim: #171a1e;
+  --border: #cbd5e1;
+  --accent: #0ea5e9;
+  --safe: #22c55e;
+  --medium: #f59e0b;
+  --high: #f97316;
+  --critical: #ef4444;
+}
+
+/* Apply theme colors to body and main containers */
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+/* Header */
+.header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.logo,
+.logo-sub,
+.tab-btn {
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+.tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+}
+
+.tab-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Cards and Panels */
+.panel,
+.ship-card,
+.scard,
+.sensor-card,
+.action-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.panel-title,
+.ship-card-top,
+.scard-label {
+  color: var(--text-secondary);
+}
+
+/* Summary Strip */
+.summary-strip {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+/* Tables */
+.data-table {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.data-table th {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border);
+}
+
+.data-table td {
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.data-table tr:hover {
+  background: var(--bg-hover);
+}
+
+/* Inputs and Buttons */
+input,
+select,
+textarea {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+button {
+  transition: all 0.3s ease;
+}
+
+/* Light Mode Specific Fixes */
+body.light-mode .offline-bar {
+  background: #fef3c7;
+  color: #92400e;
+  border-bottom: 1px solid #fbbf24;
+}
+
+body.light-mode .live-pill.online {
+  background: #dcfce7;
+  color: #166534;
+}
+
+body.light-mode .live-pill.offline {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Chart text colors (for recharts) */
+body.light-mode .recharts-text {
+  fill: var(--text-secondary) !important;
+}
+
+body.light-mode .recharts-cartesian-grid line {
+  stroke: var(--border) !important;
+}
+
+/* Empty states */
+.empty-state {
+  color: var(--text-dim);
+}
+
+/* Scrollbars (optional - makes them themed) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+body.light-mode ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+body.light-mode ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+body.light-mode ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ============================================
+   AGGRESSIVE LIGHT MODE FIX (Use if needed)
+   ============================================ */
+
+/* body.light-mode * {
+  /* Override ALL inline styles in light mode */
+
+
+body.light-mode select,
+body.light-mode input,
+body.light-mode textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.light-mode option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Fix ALL text to be visible */
+body.light-mode * {
+  color: inherit;
+}
+
+body.light-mode {
+  color: #0f172a;
+}
+
+/* Make sure headings are visible */
+body.light-mode h1,
+body.light-mode h2,
+body.light-mode h3,
+body.light-mode h4,
+body.light-mode h5,
+body.light-mode h6 {
+  color: #0f172a !important;
+}
+
+/* Make sure all labels are visible */
+body.light-mode label,
+body.light-mode span,
+body.light-mode p,
+body.light-mode div {
+  color: inherit;
+}
+
+/* ============================================
+   AGGRESSIVE FIX - ALL DARK BACKGROUNDS
+   ============================================ */
+
+/* body.light-mode * {
+  /* Find all elements with very dark backgrounds and fix them */
+
+
+/* Target any element with black/dark blue background */
+/* body.light-mode *:not(.recharts-surface):not(svg):not(path) { */
+  /* Check if background is dark (starts with #0, #1, #2) */
+
+
+body.light-mode div[style*="background-color: rgb(3"],
+body.light-mode div[style*="background-color: rgb(10"],
+body.light-mode div[style*="background-color: rgb(15"],
+body.light-mode div[style*="background: rgb(3"],
+body.light-mode div[style*="background: rgb(10"],
+body.light-mode div[style*="background: rgb(15"] {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Hex color dark backgrounds */
+body.light-mode div[style*="background-color: #03"],
+body.light-mode div[style*="background-color: #0a"],
+body.light-mode div[style*="background-color: #0f"],
+body.light-mode div[style*="background: #03"],
+body.light-mode div[style*="background: #0a"],
+body.light-mode div[style*="background: #0f"] {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}

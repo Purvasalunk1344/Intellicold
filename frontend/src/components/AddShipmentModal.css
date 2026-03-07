@@ -9,7 +9,7 @@
 
 /* ── MODAL BOX ── */
 .modal {
-  background: var(--panel); border: 1px solid var(--border2);
+  background: var(--bg-card); border: 1px solid var(--border2);
   border-radius: 10px; width: 580px; max-width: 100%;
   max-height: 90vh; display: flex; flex-direction: column;
   animation: modalIn 0.28s ease;
@@ -21,6 +21,7 @@
 
 /* ── MODAL HEADER ── */
 .modal-header {
+  background: var(--bg-secondary);
   display: flex; justify-content: space-between; align-items: center;
   padding: 18px 20px 14px;
   border-bottom: 1px solid var(--border);
@@ -43,8 +44,8 @@
 /* ── PRODUCT PREVIEW BANNER ── */
 .product-preview {
   display: flex; gap: 14px; align-items: center;
-  background: rgba(0,200,240,0.05);
-  border: 1px solid rgba(0,200,240,0.2);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: 7px; padding: 12px 16px; margin-bottom: 16px;
 }
 .preview-icon { font-size: 36px; }
