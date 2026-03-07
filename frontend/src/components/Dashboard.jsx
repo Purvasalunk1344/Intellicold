@@ -7,6 +7,7 @@ import { PRODUCT_CONFIG, VEHICLE_CONFIG } from '../data/constants';
 import './Dashboard.css';
 
 const RISK_COLOR = { Low: '#00e676', Medium: '#ffca28', High: '#ff6d00', Critical: '#ff1744' };
+const RISK_EMOJI = { Low: '🟢', Medium: '🟡', High: '🟠', Critical: '🔴' };  // ✅ Add this line
 
 // Generate simulated temperature history
 function genTempHistory(baseTemp, n = 16) {
@@ -38,7 +39,9 @@ function ShipCard({ ship, selected, onSelect, onRemove }) {
       <div className="ship-card-body">
         <div className="ship-card-top">
           <span className="ship-name">{ship.name}</span>
-          <span className={`rb rb-${ship.risk_level}`}>{ship.risk_level}</span>
+          <span className={`rb rb-${ship.risk_level}`}>
+            {RISK_EMOJI[ship.risk_level]} {ship.risk_level}
+          </span>
         </div>
         <div className="ship-route">{ship.origin} → {ship.destination} · {ship.distance_km}km</div>
         <div className="ship-stats-row">
@@ -79,10 +82,19 @@ function SensorCard({ label, value, unit, color }) {
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background: '#0c1828', border: '1px solid #1a4060', padding: '8px 12px', borderRadius: 6, fontSize: 11 }}>
-      <div style={{ color: '#3a6480', marginBottom: 4 }}>{label}</div>
+    <div style={{ 
+      background: 'var(--bg-card)', 
+      border: '1px solid var(--border)', 
+      padding: '8px 12px', 
+      borderRadius: 6, 
+      fontSize: 11,
+      color: 'var(--text-primary)'
+    }}>
+      <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
       {payload.map((p, i) => (
-        <div key={i} style={{ color: p.color }}>{p.name}: <strong>{p.value}</strong></div>
+        <div key={i} style={{ color: 'var(--text-primary)' }}>
+          {p.name}: <strong style={{ color: p.color }}>{p.value}</strong>
+        </div>
       ))}
     </div>
   );
@@ -143,9 +155,11 @@ export default function Dashboard({ shipments, selected, onSelect, onSpike, onAd
                       <div className="quality-bar-fg" style={{ width: selected.quality_remaining + '%', background: qc }} />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
-                      <span className={`rb rb-${selected.risk_level}`}>{selected.risk_level} RISK</span>
+                      <span className={`rb rb-${selected.risk_level}`}>
+                        {RISK_EMOJI[selected.risk_level]} {selected.risk_level} RISK
+                      </span>
                       <span style={{ fontSize: 10, color: selected.hours_to_spoilage < 8 ? 'var(--critical)' : 'var(--dim)' }}>
-                        {selected.hours_to_spoilage}h remaining
+                        RSL: {selected.hours_to_spoilage}h
                       </span>
                     </div>
                   </div>
@@ -163,6 +177,19 @@ export default function Dashboard({ shipments, selected, onSelect, onSpike, onAd
                       ₹{Math.round((selected.qty_kg || 500) * (selected.value_per_kg || 200) * (1 - selected.quality_remaining / 100)).toLocaleString('en-IN')}
                     </span>
                   </div>
+                  {/* Add before the closing </div> of quality-meta */}
+                  <div className="meta-row" style={{ 
+                    marginTop: '12px', 
+                    padding: '10px', 
+                    background: 'rgba(0,200,240,0.05)', 
+                    borderRadius: '6px',
+                    borderLeft: '3px solid var(--accent)'
+                  }}>
+                    <span className="meta-k">AI Recommendation</span>
+                    <span className="meta-v" style={{ color: 'var(--accent)', fontWeight: 600 }}>
+                      {selected.recommended_action}
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : <div className="empty-state">Select a shipment to view details</div>}
@@ -173,15 +200,40 @@ export default function Dashboard({ shipments, selected, onSelect, onSpike, onAd
             <div className="panel-title">◈ LIVE SENSOR DATA</div>
             {selected ? (
               <div className="sensor-grid fade-up">
+                {/* Environment Data */}
                 <SensorCard label="Temperature"    value={(f.avg_temp_c || 0).toFixed(1)} unit="°C" color={tempColor} />
                 <SensorCard label="Humidity"       value={(f.humidity_percent || 0).toFixed(0)} unit="%" />
-                <SensorCard label="Temp Deviation" value={(f.temp_deviation_degree_hr || 0).toFixed(1)} unit="°h"
-                  color={f.temp_deviation_degree_hr > 30 ? 'var(--high)' : 'var(--text)'} />
-                <SensorCard label="Damage CDI"     value={(f.cumulative_damage_index || 0).toFixed(2)} unit=""
-                  color={f.cumulative_damage_index > 1 ? 'var(--critical)' : f.cumulative_damage_index > 0.4 ? 'var(--high)' : 'var(--safe)'} />
                 <SensorCard label="NH₃ (ppm)"      value={(f.nh3_ppm || 0).toFixed(1)} unit=""
                   color={f.nh3_ppm > 6 ? 'var(--high)' : 'var(--text)'} />
-                <SensorCard label="Transit"        value={(f.transport_duration_hr || 0).toFixed(1)} unit="h" />
+                <SensorCard label="Exposure Time"  value={(f.transport_duration_hr || 0).toFixed(1)} unit="h" />
+  
+                {/* Deviation & Damage */}
+                <SensorCard 
+                  label="Temp Deviation" 
+                  value={Math.max(0, (f.avg_temp_c || 0) - (cfg.safeTemp || 4)).toFixed(1)} 
+                  unit="°C"
+                  color={Math.max(0, (f.avg_temp_c || 0) - (cfg.safeTemp || 4)) > 3 ? 'var(--high)' : 'var(--text)'} 
+                />
+                <SensorCard 
+                  label="Heat Exposure" 
+                  value={(f.temp_deviation_degree_hr || 0).toFixed(1)} 
+                  unit="°C·h"
+                  color={f.temp_deviation_degree_hr > 30 ? 'var(--high)' : 'var(--text)'} 
+                />
+                <SensorCard 
+                  label="Thermal Damage Score"     
+                  value={(f.cumulative_damage_index || 0).toFixed(2)} 
+                  unit=""
+                  color={f.cumulative_damage_index > 1 ? 'var(--critical)' : f.cumulative_damage_index > 0.4 ? 'var(--high)' : 'var(--safe)'} 
+                />
+  
+                {/* AI Prediction */}
+                <SensorCard 
+                  label="Remaining Shelf Life" 
+                  value={selected.hours_to_spoilage.toFixed(1)} 
+                  unit="hours"
+                  color={selected.hours_to_spoilage < 8 ? 'var(--critical)' : selected.hours_to_spoilage < 24 ? 'var(--medium)' : 'var(--safe)'} 
+                />
               </div>
             ) : <div className="empty-state">Select a shipment</div>}
           </div>
@@ -278,7 +330,7 @@ export default function Dashboard({ shipments, selected, onSelect, onSpike, onAd
                 <thead>
                   <tr>
                     <th>#</th><th>SHIPMENT</th><th>PRODUCT</th><th>QTY</th>
-                    <th>RISK</th><th>QUALITY</th><th>SAFE FOR</th><th>DIST</th>
+                    <th>RISK</th><th>QUALITY</th><th>RSL (hours)</th><th>DIST</th>
                   </tr>
                 </thead>
                 <tbody>
