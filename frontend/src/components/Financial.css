@@ -5,18 +5,30 @@
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
 }
 .fin-kpi {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 8px; padding: 16px;
+  background: var(--bg-card); /* ✅ Already correct */
+  border: 1px solid var(--border);
+  border-radius: 8px; 
+  padding: 16px;
+  color: var(--text-primary); /* ✅ Added */
 }
 .fin-kpi-label {
-  font-size: 8px; color: var(--dim);
-  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+  font-size: 8px; 
+  color: var(--text-secondary); /* ✅ Changed */
+  letter-spacing: 2px; 
+  text-transform: uppercase; 
+  margin-bottom: 6px;
 }
 .fin-kpi-val {
   font-family: var(--font-display);
-  font-size: 26px; font-weight: 700; line-height: 1;
+  font-size: 26px; 
+  font-weight: 700; 
+  line-height: 1;
 }
-.fin-kpi-sub { font-size: 9px; color: var(--dim); margin-top: 4px; }
+.fin-kpi-sub { 
+  font-size: 9px; 
+  color: var(--text-secondary); /* ✅ Changed */
+  margin-top: 4px; 
+}
 
 /* ── CHARTS ROW ── */
 .fin-charts-row {
@@ -30,7 +42,8 @@
 
 /* ── INTELLICOLD SAVINGS BOX ── */
 .intellicold-savings {
-  margin-top: 16px; padding: 14px;
+  margin-top: 16px; 
+  padding: 14px;
   background: rgba(0,200,240,0.05);
   border: 1px solid rgba(0,200,240,0.2);
   border-radius: 6px;

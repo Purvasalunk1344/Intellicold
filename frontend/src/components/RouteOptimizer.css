@@ -88,3 +88,45 @@
   .route-main  { grid-template-columns: 1fr; }
   .route-stats { grid-template-columns: 1fr 1fr; }
 }
+
+.route-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.rstat {
+  background: var(--bg-card);  /* ✅ Add this */
+  border: 1px solid var(--border);  /* ✅ Add this */
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.rstat-val {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.rstat-label {
+  font-size: 9px;
+  color: var(--text-secondary);  /* ✅ Changed from var(--dim) */
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.ship-context-bar {
+  background: var(--bg-card);  /* ✅ Add this */
+  border: 1px solid var(--border);  /* ✅ Add this */
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 14px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-primary);  /* ✅ Add this */
+}

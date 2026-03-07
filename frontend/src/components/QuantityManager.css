@@ -5,8 +5,11 @@
   display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
 }
 .qty-sum-card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 8px; padding: 14px;
+  background: var(--bg-card); 
+  border: 1px solid var(--border);
+  border-radius: 8px; 
+  padding: 14px;
+  color: var(--text-primary); /* ✅ Added */
 }
 
 /* ── QUANTITY GRID ── */
@@ -16,20 +19,21 @@
   display: grid;
   grid-template-columns: 1fr 200px auto;
   gap: 16px; align-items: center;
-  background: rgba(0,0,0,0.25); border: 1px solid var(--border);
+  background: var(--bg-card); /* ✅ Changed from rgba(0,0,0,0.25) */
+  border: 1px solid var(--border);
   border-radius: 8px; padding: 14px 16px;
   transition: border-color 0.18s;
 }
-.qty-row:hover { border-color: var(--border2); }
+.qty-row:hover { border-color: var(--accent); } /* ✅ Changed */
 
 /* ── IDENTITY COLUMN ── */
 .qty-identity { display: flex; gap: 12px; align-items: flex-start; }
 .qty-icon     { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
-.qty-name     { font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 2px; }
-.qty-sub      { font-size: 9px; color: var(--dim); }
+.qty-name     { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; } /* ✅ Changed */
+.qty-sub      { font-size: 9px; color: var(--text-dim); } /* ✅ Changed */
 .qty-qbar-bg  {
   height: 3px; border-radius: 2px;
-  background: rgba(255,255,255,0.05);
+  background: var(--bg-secondary); /* ✅ Changed */
   overflow: hidden; margin-top: 7px;
 }
 .qty-qbar-fg  { height: 100%; border-radius: 2px; transition: width 0.8s ease; }
@@ -54,7 +58,9 @@
   border: 1px solid var(--border); border-radius: 5px; overflow: hidden;
 }
 .spin-btn {
-  background: var(--panel2); border: none; color: var(--accent);
+  background: var(--bg-secondary); /* ✅ Changed */
+  border: none; 
+  color: var(--accent);
   width: 30px; height: 32px; cursor: pointer; font-size: 16px;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s; font-family: var(--font-mono);
@@ -63,10 +69,12 @@
 
 .spin-inp {
   width: 60px; text-align: center;
-  background: var(--bg2); border: none;
+  background: var(--bg-secondary); /* ✅ Changed */
+  border: none;
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
-  color: var(--white); font-family: var(--font-display);
+  color: var(--text-primary); /* ✅ Changed */
+  font-family: var(--font-display);
   font-size: 13px; padding: 5px 0; outline: none; height: 32px;
 }
 .spin-inp::-webkit-inner-spin-button,

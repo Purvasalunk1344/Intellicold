@@ -177,7 +177,7 @@ export default function RouteOptimizer({ shipments, defaultShipId }) {
             <span>{cfg.icon} <strong style={{ color: 'var(--white)' }}>{ship.name}</strong></span>
             <span>{ship.qty_kg?.toLocaleString()} kg · {ship.distance_km}km</span>
             <span className={`rb rb-${ship.risk_level}`}>{ship.risk_level} Risk</span>
-            <span style={{ color: 'var(--dim)' }}>Quality: {ship.quality_remaining}% · {ship.hours_to_spoilage}h safe</span>
+            <span style={{ color: 'var(--text-secondary)' }}>Quality: {ship.quality_remaining}% · {ship.hours_to_spoilage}h safe</span>
           </div>
         )}
       </div>
@@ -208,7 +208,7 @@ export default function RouteOptimizer({ shipments, defaultShipId }) {
               <div className="route-stats">
                 {[
                   { label: 'DISTANCE',      val: activeRoute.dist + 'km',            color: 'var(--accent)' },
-                  { label: 'ETA',           val: activeRoute.hrs.toFixed(1) + 'h',   color: 'var(--white)' },
+                  { label: 'ETA', val: activeRoute.hrs.toFixed(1) + 'h', color: 'var(--text-primary)' },
                   { label: 'RISK SCORE',    val: activeRoute.riskScore + '/100',     color: activeRoute.riskScore > 60 ? 'var(--critical)' : activeRoute.riskScore > 35 ? 'var(--high)' : 'var(--safe)' },
                   { label: 'QUALITY SAVED', val: '+' + activeRoute.qualitySaved + '%', color: 'var(--safe)' },
                 ].map((s, i) => (
@@ -227,7 +227,7 @@ export default function RouteOptimizer({ shipments, defaultShipId }) {
             <div className="alt-list">
               {routes.map((r, i) => (
                 <div key={r.id} className={`alt-card ${selected === i ? 'active' : ''}`} onClick={() => setSelected(i)}>
-                  <div className="alt-card-dot" style={{ background: r.color }} />
+                  <div className="alt-card-dot" style={{ ro: r.color }} />
                   <div className="alt-card-body">
                     <div className="alt-card-name">
                       {r.name} <span className="alt-tag">[{r.tag}]</span>

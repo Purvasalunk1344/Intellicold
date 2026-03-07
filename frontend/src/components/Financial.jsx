@@ -11,11 +11,18 @@ const RISK_NAMES  = ['Low', 'Medium', 'High', 'Critical'];
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background: '#0c1828', border: '1px solid #1a4060', padding: '8px 12px', borderRadius: 6, fontSize: 11 }}>
-      <div style={{ color: '#3a6480', marginBottom: 4 }}>{label}</div>
+    <div style={{ 
+      background: 'var(--bg-card)', 
+      border: '1px solid var(--border)', 
+      padding: '8px 12px', 
+      borderRadius: 6, 
+      fontSize: 11,
+      color: 'var(--text-primary)'
+    }}>
+      <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
       {payload.map((p, i) => (
-        <div key={i} style={{ color: p.color || '#fff' }}>
-          {p.name}: <strong>₹{Number(p.value).toLocaleString('en-IN')}</strong>
+        <div key={i} style={{ color: 'var(--text-primary)' }}>
+          {p.name}: <strong style={{ color: p.color }}>₹{Number(p.value).toLocaleString('en-IN')}</strong>
         </div>
       ))}
     </div>
@@ -112,7 +119,7 @@ export default function Financial({ shipments }) {
                   <Cell key={i} fill={RISK_COLORS[RISK_NAMES.indexOf(entry.name)]} opacity={0.8} />
                 ))}
               </Pie>
-              <Legend formatter={(value) => <span style={{ color: 'var(--text)', fontSize: 10 }}>{value}</span>} />
+              <Legend formatter={(value) => <span style={{ color: 'var(--text-primary)', fontSize: 10 }}>{value}</span>} />
               <Tooltip formatter={(v) => [`${v} shipment${v > 1 ? 's' : ''}`, '']} />
             </PieChart>
           </ResponsiveContainer>
@@ -197,20 +204,20 @@ export default function Financial({ shipments }) {
 
           {/* IntelliCold savings estimate */}
           <div className="intellicold-savings">
-            <div style={{ fontSize: 9, color: 'var(--dim)', letterSpacing: 2, marginBottom: 8 }}>
-              INTELLICOLD SYSTEM VALUE
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--text)', lineHeight: 1.8 }}>
-              Traditional systems alert <em style={{ color: 'var(--medium)' }}>after</em> threshold breach.
-              IntelliCold's predictive model identifies risk{' '}
-              <strong style={{ color: 'var(--safe)' }}>hours in advance</strong>, enabling proactive
-              intervention and saving an estimated{' '}
-              <strong style={{ color: 'var(--accent)', fontSize: 14 }}>
-                ₹{Math.round(interventionSavings.reduce((a, s) => a + s.saving, 0)).toLocaleString('en-IN')}
-              </strong>{' '}
-              on this fleet alone.
-            </div>
+          <div style={{ fontSize: 9, color: 'var(--text-secondary)', letterSpacing: 2, marginBottom: 8 }}>
+            INTELLICOLD SYSTEM VALUE
           </div>
+          <div style={{ fontSize: 11, color: 'var(--text-primary)', lineHeight: 1.8 }}>
+            Traditional systems alert <em style={{ color: 'var(--medium)' }}>after</em> threshold breach.
+            IntelliCold's predictive model identifies risk{' '}
+            <strong style={{ color: 'var(--safe)' }}>hours in advance</strong>, enabling proactive
+            intervention and saving an estimated{' '}
+            <strong style={{ color: 'var(--accent)', fontSize: 14 }}>
+              ₹{Math.round(interventionSavings.reduce((a, s) => a + s.saving, 0)).toLocaleString('en-IN')}
+            </strong>{' '}
+            on this fleet alone.
+          </div>
+        </div>
         </div>
 
       </div>
