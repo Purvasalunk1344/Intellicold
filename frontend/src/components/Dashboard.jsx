@@ -308,16 +308,17 @@ export default function Dashboard({ shipments, selected, onSelect, onSpike, onAd
             <div className="panel-title">◈ AI RECOMMENDATIONS</div>
             {selected ? (
               <div className="action-list">
-                {(selected.actions || []).map((a, i) => {
-                  const cls = a.includes('CRITICAL') || a.includes('EMERGENCY') ? 'crit'
-                            : a.includes('HIGH') || a.includes('⚠️') || a.includes('Expedite') ? 'high'
-                            : a.includes('MEDIUM') || a.includes('🔶') || a.includes('Monitor') ? 'med' : '';
-                  return (
-                    <div key={i} className={`action-item ${cls} slide-in`} style={{ animationDelay: `${i * 0.06}s` }}>
-                      {a}
-                    </div>
-                  );
-                })}
+               {(selected.actions || []).map((a, i) => {
+  const text = typeof a === 'object' ? (a.action || a.priority || JSON.stringify(a)) : String(a);
+  const cls = text.includes('CRITICAL') || text.includes('EMERGENCY') ? 'crit'
+            : text.includes('HIGH') || text.includes('⚠️') || text.includes('Expedite') ? 'high'
+            : text.includes('MEDIUM') || text.includes('🔶') || text.includes('Monitor') ? 'med' : '';
+  return (
+    <div key={i} className={`action-item ${cls} slide-in`} style={{ animationDelay: `${i * 0.06}s` }}>
+      {text}
+    </div>
+  );
+})}
               </div>
             ) : <div className="empty-state">Select a shipment</div>}
           </div>

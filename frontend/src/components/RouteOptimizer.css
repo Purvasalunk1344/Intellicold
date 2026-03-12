@@ -7,15 +7,30 @@
 .route-controls > div { min-width: 160px; }
 
 .ship-context-bar {
-  display: flex; gap: 18px; align-items: center;
-  flex-wrap: wrap; font-size: 10px; color: var(--dim);
-  background: rgba(0,0,0,0.25); border: 1px solid var(--border);
-  border-radius: 6px; padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 14px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-primary);
 }
 
 /* ── ROUTE MAIN LAYOUT ── */
 .route-main {
-  display: grid; grid-template-columns: 1fr 360px; gap: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.left-column {
+  display: flex; flex-direction: column; gap: 14px;
+}
+.right-column {
+  display: flex; flex-direction: column; gap: 14px;
 }
 
 /* ── ROUTE VISUALIZATION ── */
@@ -47,18 +62,35 @@
 
 /* ── ROUTE STATS ── */
 .route-stats {
-  display: grid; grid-template-columns: repeat(4,1fr);
-  gap: 10px; margin-top: 6px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 20px;
 }
+
 .rstat {
-  background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-  border-radius: 6px; padding: 10px 12px; text-align: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
 }
-.rstat-val   { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
-.rstat-label { font-size: 8px; color: var(--dim); margin-top: 3px; letter-spacing: 1px; }
+
+.rstat-val {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.rstat-label {
+  font-size: 9px;
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
 
 /* ── ALTERNATIVE ROUTES ── */
-/* .alt-panel {} */
 .alt-list  { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
 
 .alt-card {
@@ -87,46 +119,4 @@
 @media (max-width: 1000px) {
   .route-main  { grid-template-columns: 1fr; }
   .route-stats { grid-template-columns: 1fr 1fr; }
-}
-
-.route-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.rstat {
-  background: var(--bg-card);  /* ✅ Add this */
-  border: 1px solid var(--border);  /* ✅ Add this */
-  padding: 16px;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.rstat-val {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.rstat-label {
-  font-size: 9px;
-  color: var(--text-secondary);  /* ✅ Changed from var(--dim) */
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.ship-context-bar {
-  background: var(--bg-card);  /* ✅ Add this */
-  border: 1px solid var(--border);  /* ✅ Add this */
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-top: 14px;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  font-size: 11px;
-  color: var(--text-primary);  /* ✅ Add this */
 }
