@@ -26,10 +26,28 @@ export function useShipments() {
       setOnline(true);
       setLastUpdate(new Date());
     } catch {
-      if (!online) {
-        setShipments(applyOverrides(DEMO_SHIPMENTS));
-        setOnline(false);
-      }
+      setOnline(false);
+      
+      setShipments(prev => {
+        // If we have NO local shipments, initialize with the DEMO data
+        if (prev.length === 0) {
+          return applyOverrides(DEMO_SHIPMENTS);
+        }
+        
+        // Otherwise, EVOLVE the existing local state so user-added entries aren't deleted
+        return prev.map(s => {
+          let updatedS = { ...s };
+          if (s.features) {
+            updatedS.features = {
+              ...s.features,
+              avg_temp_c: +(s.features.avg_temp_c + (Math.random() * 0.35 - 0.1)).toFixed(2),
+              transport_duration_hr: +(s.features.transport_duration_hr + +((5 / 3600).toFixed(4))).toFixed(2),
+            };
+          }
+          return updatedS;
+        });
+      });
+      setLastUpdate(new Date());
     } finally {
       setLoading(false);
     }
@@ -48,9 +66,30 @@ export function useShipments() {
     );
   }, []);
 
-  const addShipment = useCallback((ship) => {
+  const addShipment = useCallback(async (ship) => {
     setShipments(prev => [...prev, ship]);
-  }, []);
+    try {
+      await fetch(`${API}/shipments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: ship.id,
+          name: ship.name,
+          origin: ship.origin,
+          destination: ship.destination,
+          distance_km: ship.distance_km,
+          product_type: ship.product_type,
+          vehicle_type: ship.vehicle_type,
+          qty_kg: ship.qty_kg,
+          value_per_kg: ship.value_per_kg,
+          features: ship.features
+        })
+      });
+      fetch_();
+    } catch (e) {
+      console.error('Failed to add shipment to backend', e);
+    }
+  }, [fetch_]);
 
   const removeShipment = useCallback((id) => {
     setShipments(prev => prev.filter(s => s.id !== id));

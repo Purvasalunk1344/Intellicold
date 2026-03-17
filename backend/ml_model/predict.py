@@ -181,7 +181,7 @@ def engineer_features(data: Dict[str, Any]):
     cat_enc  = CATEGORY_ENC.get(product, 1)
     prod_enc = PRODUCT_ENC.get(product, 14)
 
-    # ── Scaler DataFrame (21 features) ──
+    # Scaler DataFrame (21 features) ──
     scaler_df = pd.DataFrame([{
         'temperature_C':             temp,
         'humidity_percent':          humidity,
@@ -206,7 +206,7 @@ def engineer_features(data: Dict[str, Any]):
         'action_encoded':            0,    # placeholder
     }])[SCALER_COLS]
 
-    # ── Model DataFrame (20 features) ──
+    # Model DataFrame (20 features) ──
     model_df = pd.DataFrame([{
         'temperature_C':             temp,
         'humidity_percent':          humidity,

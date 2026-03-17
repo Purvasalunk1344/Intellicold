@@ -63,7 +63,6 @@ import RouteOptimizer from './components/RouteOptimizer';
 import QuantityManager from './components/QuantityManager';
 import Financial from './components/Financial';
 import AddShipmentModal from './components/AddShipmentModal';
-import VoiceAssistant from './components/VoiceAssistant';
 import './App.css';
 
 const TABS = [
@@ -212,9 +211,6 @@ export default function App() {
           existingCount={shipments.length}
         />
       )}
-
-      {/* Voice Assistant Bot */}
-      <VoiceAssistant shipments={shipments} />
     </div>
   );
 }

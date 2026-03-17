@@ -1,12 +1,28 @@
 // Perishable goods only — no vaccines or pharma
 export const PRODUCT_CONFIG = {
+  apple:     { label:'Apple',     icon:'🍎', safeTemp:2,  shelfDays:30, unit:'kg',     valuePerKg:120, color:'#fff1f0', accent:'#f5222d' },
+  banana:    { label:'Banana',    icon:'🍌', safeTemp:14, shelfDays:14, unit:'kg',     valuePerKg:60,  color:'#fffbe6', accent:'#fadb14' },
+  butter:    { label:'Butter',    icon:'🧈', safeTemp:4,  shelfDays:90, unit:'kg',     valuePerKg:500, color:'#fffbe6', accent:'#faad14' },
+  cabbage:   { label:'Cabbage',   icon:'🥬', safeTemp:0,  shelfDays:21, unit:'kg',     valuePerKg:40,  color:'#f6ffed', accent:'#52c41a' },
+  carrot:    { label:'Carrot',    icon:'🥕', safeTemp:0,  shelfDays:30, unit:'kg',     valuePerKg:50,  color:'#fff2e8', accent:'#fa541c' },
+  chicken:   { label:'Chicken',   icon:'🍗', safeTemp:2,  shelfDays:5,  unit:'kg',     valuePerKg:250, color:'#fff0f6', accent:'#eb2f96' },
+  fish:      { label:'Fish',      icon:'🐟', safeTemp:0,  shelfDays:3,  unit:'kg',     valuePerKg:450, color:'#e6f7ff', accent:'#1890ff' },
+  grapes:    { label:'Grapes',    icon:'🍇', safeTemp:0,  shelfDays:14, unit:'kg',     valuePerKg:100, color:'#f9f0ff', accent:'#722ed1' },
+  mango:     { label:'Mango',     icon:'🥭', safeTemp:12, shelfDays:14, unit:'kg',     valuePerKg:150, color:'#fff7e6', accent:'#fa8c16' },
   milk:      { label:'Milk',      icon:'🥛', safeTemp:4,  shelfDays:7,  unit:'litres', valuePerKg:55,  color:'#e8f5e9', accent:'#4caf50' },
+  mutton:    { label:'Mutton',    icon:'🥩', safeTemp:2,  shelfDays:5,  unit:'kg',     valuePerKg:800, color:'#fff1f0', accent:'#f5222d' },
+  onion:     { label:'Onion',     icon:'🧅', safeTemp:10, shelfDays:30, unit:'kg',     valuePerKg:30,  color:'#fff0f6', accent:'#eb2f96' },
+  orange:    { label:'Orange',    icon:'🍊', safeTemp:4,  shelfDays:30, unit:'kg',     valuePerKg:80,  color:'#fff7e6', accent:'#fa8c16' },
+  paneer:    { label:'Paneer',    icon:'🧀', safeTemp:4,  shelfDays:14, unit:'kg',     valuePerKg:350, color:'#fffbe6', accent:'#faad14' },
+  potato:    { label:'Potato',    icon:'🥔', safeTemp:10, shelfDays:60, unit:'kg',     valuePerKg:25,  color:'#ffe0b2', accent:'#ffb300' },
+  tomato:    { label:'Tomato',    icon:'🍅', safeTemp:8,  shelfDays:14, unit:'kg',     valuePerKg:40,  color:'#fff1f0', accent:'#f5222d' },
+  
+  // Legacy placeholders to maintain backward compatibility
   meat:      { label:'Meat',      icon:'🥩', safeTemp:2,  shelfDays:5,  unit:'kg',     valuePerKg:380, color:'#fbe9e7', accent:'#ff5722' },
   seafood:   { label:'Seafood',   icon:'🐟', safeTemp:0,  shelfDays:3,  unit:'kg',     valuePerKg:520, color:'#e3f2fd', accent:'#2196f3' },
   fruit:     { label:'Fruit',     icon:'🍎', safeTemp:8,  shelfDays:10, unit:'kg',     valuePerKg:90,  color:'#fff8e1', accent:'#ffc107' },
   vegetable: { label:'Vegetable', icon:'🥦', safeTemp:5,  shelfDays:8,  unit:'kg',     valuePerKg:45,  color:'#f1f8e9', accent:'#8bc34a' },
   yogurt:    { label:'Yogurt',    icon:'🫙', safeTemp:4,  shelfDays:14, unit:'kg',     valuePerKg:120, color:'#fce4ec', accent:'#e91e63' },
-  fish:      { label:'Fish',      icon:'🐠', safeTemp:0,  shelfDays:2,  unit:'kg',     valuePerKg:450, color:'#e8eaf6', accent:'#3f51b5' },
   eggs:      { label:'Eggs',      icon:'🥚', safeTemp:5,  shelfDays:21, unit:'dozen',  valuePerKg:80,  color:'#fff3e0', accent:'#ff9800' },
 };
 
@@ -33,7 +49,7 @@ export const DEMO_SHIPMENTS = [
     features: {
       avg_temp_c: 3.2, humidity_percent: 62,
       temp_deviation_degree_hr: 4.1, cumulative_damage_index: 0.08,
-      transport_duration_hr: 6.5, nh3_ppm: 1.2,
+      transport_duration_hr: 6.5, nh3_ppm: 1.2, co2_ppm: 420, h2s_ppm: 0.05, ethylene_ppm: 0.8,
     },
     readings: [],
   },
@@ -54,7 +70,7 @@ export const DEMO_SHIPMENTS = [
     features: {
       avg_temp_c: 7.1, humidity_percent: 81,
       temp_deviation_degree_hr: 38.2, cumulative_damage_index: 0.52,
-      transport_duration_hr: 14.2, nh3_ppm: 5.8,
+      transport_duration_hr: 14.2, nh3_ppm: 5.8, co2_ppm: 580, h2s_ppm: 0.8, ethylene_ppm: 6.2,
     },
     readings: [],
   },
@@ -76,7 +92,7 @@ export const DEMO_SHIPMENTS = [
     features: {
       avg_temp_c: 11.4, humidity_percent: 74,
       temp_deviation_degree_hr: 98.6, cumulative_damage_index: 2.9,
-      transport_duration_hr: 28.7, nh3_ppm: 9.2,
+      transport_duration_hr: 28.7, nh3_ppm: 9.2, co2_ppm: 750, h2s_ppm: 1.5, ethylene_ppm: 8.5,
     },
     readings: [],
   },
@@ -96,7 +112,7 @@ export const DEMO_SHIPMENTS = [
     features: {
       avg_temp_c: 6.8, humidity_percent: 83,
       temp_deviation_degree_hr: 8.4, cumulative_damage_index: 0.14,
-      transport_duration_hr: 3.2, nh3_ppm: 2.1,
+      transport_duration_hr: 3.2, nh3_ppm: 2.1, co2_ppm: 480, h2s_ppm: 0.1, ethylene_ppm: 2.5,
     },
     readings: [],
   },
@@ -117,7 +133,7 @@ export const DEMO_SHIPMENTS = [
     features: {
       avg_temp_c: 9.4, humidity_percent: 76,
       temp_deviation_degree_hr: 22.7, cumulative_damage_index: 0.38,
-      transport_duration_hr: 19.5, nh3_ppm: 3.4,
+      transport_duration_hr: 19.5, nh3_ppm: 3.4, co2_ppm: 610, h2s_ppm: 0.3, ethylene_ppm: 12.4,
     },
     readings: [],
   },

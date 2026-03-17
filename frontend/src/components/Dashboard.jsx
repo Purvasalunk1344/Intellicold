@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   LineChart, Line, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
@@ -9,13 +9,51 @@ import './Dashboard.css';
 const RISK_COLOR = { Low: '#00e676', Medium: '#ffca28', High: '#ff6d00', Critical: '#ff1744' };
 const RISK_EMOJI = { Low: '🟢', Medium: '🟡', High: '🟠', Critical: '🔴' };  // ✅ Add this line
 
-// Generate simulated temperature history
-function genTempHistory(baseTemp, n = 16) {
-  return Array.from({ length: n }, (_, i) => ({
-    time: `-${(n - 1 - i) * 5}m`,
-    temp: +(baseTemp + Math.sin(i * 0.55) * 1.4 + (Math.random() - 0.5) * 0.9).toFixed(2),
-    safe: 4,
-  }));
+// Build temp history — always shows last 72 minutes on X-axis
+function buildTempHistory(readings, baseTemp) {
+  const WINDOW_MINS = 72;
+  const NUM_POINTS = 13; // every 6 minutes: -72m, -66m, ... -6m, now
+  const stepMins = WINDOW_MINS / (NUM_POINTS - 1);
+
+  if (readings && readings.length > 0) {
+    const sorted = [...readings].reverse();
+    const nowMs = Date.now();
+
+    // Map readings to minutes-ago within the 72-min window
+    const sparse = sorted.map(r => {
+      const ts = r.timestamp ? new Date(r.timestamp).getTime() : nowMs;
+      const minsAgo = (nowMs - ts) / 60_000;
+      return { minsAgo, temp: +(r.temperature || baseTemp || 5).toFixed(2) };
+    }).filter(p => p.minsAgo <= WINDOW_MINS);
+
+    // Snap onto fixed NUM_POINTS grid
+    return Array.from({ length: NUM_POINTS }, (_, i) => {
+      const targetMinAgo = WINDOW_MINS - i * stepMins;
+      const label = targetMinAgo === 0 ? 'now' : `-${Math.round(targetMinAgo)}m`;
+
+      let closest = sparse[0];
+      let minDiff = Infinity;
+      for (const p of sparse) {
+        const diff = Math.abs(p.minsAgo - targetMinAgo);
+        if (diff < minDiff) { minDiff = diff; closest = p; }
+      }
+      return {
+        time: label,
+        temp: closest ? closest.temp : +(baseTemp + Math.sin(i * 0.5) * 1.2).toFixed(2),
+        safe: baseTemp,
+      };
+    });
+  }
+
+  // Fallback: simulate 72-minute profile
+  return Array.from({ length: NUM_POINTS }, (_, i) => {
+    const mAgo = WINDOW_MINS - i * stepMins;
+    return {
+      time: mAgo === 0 ? 'now' : `-${Math.round(mAgo)}m`,
+      temp: +(baseTemp + Math.sin(i * 0.55) * 1.4 + (Math.random() - 0.5) * 0.9).toFixed(2),
+      safe: baseTemp,
+    };
+  });
 }
 
 // Generate quality forecast
@@ -100,15 +138,42 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
+const API = 'http://localhost:5000/api';
+
+// Hook: fetch sensor history for selected shipment
+function useSensorHistory(shipmentId) {
+  const [history, setHistory] = useState([]);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    if (!shipmentId) { setHistory([]); return; }
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch(`${API}/history/${shipmentId}?limit=200`);
+        const data = await res.json();
+        setHistory(data.readings || []);
+      } catch { /* offline – keep previous */ }
+    };
+    fetchHistory();
+    timerRef.current = setInterval(fetchHistory, 5000);
+    return () => clearInterval(timerRef.current);
+  }, [shipmentId]);
+
+  return history;
+}
+
 export default function Dashboard({ shipments, selected, onSelect, onSpike, onAdd, onRemove }) {
   const sorted = [...shipments].sort((a, b) => a.priority_rank - b.priority_rank);
   const cfg = selected ? (PRODUCT_CONFIG[selected.product_type] || {}) : {};
   const vcfg = selected ? (VEHICLE_CONFIG[selected.vehicle_type] || {}) : {};
   const f = selected?.features || {};
 
-  const tempData  = selected ? genTempHistory(f.avg_temp_c || 5) : [];
+  const tempData  = selected ? buildTempHistory(selected.readings, f.avg_temp_c || 5) : [];
   const qualData  = selected ? genQualForecast(selected.quality_remaining, selected.hours_to_spoilage) : [];
   const qc = selected ? (RISK_COLOR[selected.risk_level] || '#fff') : '#fff';
+
+  const sensorHistory = useSensorHistory(selected?.id); // still fetches so the count is accurate, but not rendered
+  void sensorHistory; // suppress unused warning
 
   const tempColor = f.avg_temp_c > (cfg.safeTemp || 4) + 3 ? 'var(--high)'
                   : f.avg_temp_c > (cfg.safeTemp || 4) ? 'var(--medium)'
@@ -197,16 +262,28 @@ export default function Dashboard({ shipments, selected, onSelect, onSpike, onAd
 
           {/* Sensors */}
           <div className="panel">
-            <div className="panel-title">◈ LIVE SENSOR DATA</div>
+            <div className="panel-title" style={{ justifyContent: 'space-between' }}>
+              <span>◈ LIVE SENSOR DATA</span>
+              {selected?.is_live && (
+                <span style={{ fontSize: 9, color: '#00e676', border: '1px solid #00e676', borderRadius: 4, padding: '2px 6px', letterSpacing: 1 }}>
+                  ⬤ ESP32 LIVE
+                </span>
+              )}
+            </div>
             {selected ? (
               <div className="sensor-grid fade-up">
                 {/* Environment Data */}
                 <SensorCard label="Temperature"    value={(f.avg_temp_c || 0).toFixed(1)} unit="°C" color={tempColor} />
                 <SensorCard label="Humidity"       value={(f.humidity_percent || 0).toFixed(0)} unit="%" />
-                <SensorCard label="NH₃ (ppm)"      value={(f.nh3_ppm || 0).toFixed(1)} unit=""
+                <SensorCard label="NH₃"      value={(f.nh3_ppm || 0).toFixed(1)} unit="ppm"
                   color={f.nh3_ppm > 6 ? 'var(--high)' : 'var(--text)'} />
-                <SensorCard label="Exposure Time"  value={(f.transport_duration_hr || 0).toFixed(1)} unit="h" />
-  
+                <SensorCard label="CO₂"      value={(f.co2_ppm || 0).toFixed(0)} unit="ppm"
+                  color={f.co2_ppm > 1000 ? 'var(--high)' : 'var(--text)'} />
+                <SensorCard label="H₂S"      value={(f.h2s_ppm || 0).toFixed(2)} unit="ppm"
+                  color={f.h2s_ppm > 0.5 ? 'var(--critical)' : 'var(--text)'} />
+                <SensorCard label="Ethylene" value={(f.ethylene_ppm || 0).toFixed(1)} unit="ppm"
+                  color={f.ethylene_ppm > 5 ? 'var(--high)' : 'var(--text)'} />
+                <SensorCard label="Exposure"  value={(f.transport_duration_hr || 0).toFixed(1)} unit="h" />
                 {/* Deviation & Damage */}
                 <SensorCard 
                   label="Temp Deviation" 
@@ -365,6 +442,7 @@ export default function Dashboard({ shipments, selected, onSelect, onSpike, onAd
           </div>
 
         </div>
+
       </div>
     </div>
   );
