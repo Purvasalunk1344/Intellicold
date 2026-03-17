@@ -1,203 +1,88 @@
-"""
-IntelliCold — ML Training Pipeline
-====================================
-Trains on 3 real datasets:
-  • KAGGLE.xlsx   (999 rows  — Sensor_Log sheet)
-  • ACM_TRAIN.xlsx (1000 rows — full dataset)
-  • ACM_MAIN.xlsx  (800 rows  — train split)
-Test evaluation on:
-  • ACM_ML.xlsx   (200 rows  — held-out test set)
+# IntelliCold
 
-Models produced:
-  • classifier.pkl    → spoilage risk level  (Low / Medium / High / Critical)
-  • quality_reg.pkl   → quality remaining %  (0–100)
-  • time_reg.pkl      → hours to spoilage    (0–72)
-  • action_clf.pkl    → recommended action   (4 classes)
-  • encoders.pkl      → label encoders + feature list
-"""
+A full-stack proof-of-concept for **cold-chain shipment monitoring & spoilage prediction**, including:
 
-import pandas as pd
-import numpy as np
-import openpyxl
-import joblib, os, warnings
-warnings.filterwarnings('ignore')
+- ✅ **Frontend dashboard** (React)
+- ✅ **Backend API** (FastAPI)
+- ✅ **ML model inference** (scikit-learn)
+- ✅ **Data pipeline + training scripts** (Python)
 
-from sklearn.ensemble          import RandomForestClassifier, RandomForestRegressor, GradientBoostingRegressor
-from sklearn.linear_model      import LogisticRegression
-from sklearn.preprocessing     import LabelEncoder, StandardScaler
-from sklearn.model_selection   import cross_val_score, StratifiedKFold
-from sklearn.metrics           import (accuracy_score, classification_report,
-                                       mean_absolute_error, r2_score,
-                                       confusion_matrix)
-from sklearn.pipeline          import Pipeline
-from sklearn.impute             import SimpleImputer
+---
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 1. DATA LOADING
-# ─────────────────────────────────────────────────────────────────────────────
+## 🚀 Getting Started
 
-def load_excel(path, sheet):
-    wb  = openpyxl.load_workbook(path, read_only=True, data_only=True)
-    ws  = wb[sheet]
-    rows = list(ws.iter_rows(values_only=True))
-    headers = [str(h) for h in rows[0]]
-    data    = [dict(zip(headers, r)) for r in rows[1:] if any(v is not None for v in r)]
-    return pd.DataFrame(data)
+### 1) Install dependencies
 
-print("=" * 65)
-print("  IntelliCold — Loading Real Datasets")
-print("=" * 65)
+#### Backend (Python)
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
 
-# ── KAGGLE dataset (Sensor_Log) ──────────────────────────────────────────────
-df_kaggle = load_excel('/mnt/user-data/uploads/KAGGLE.xlsx', 'Sensor_Log')
-print(f"\n[1] KAGGLE Sensor_Log       : {len(df_kaggle):>5} rows  |  {len(df_kaggle.columns)} cols")
+#### Frontend (Node)
+```powershell
+cd frontend
+npm install
+```
 
-# Rename to unified schema
-df_kaggle = df_kaggle.rename(columns={
-    'Temperature_C'         : 'avg_temp_c',
-    'Humidity_pct'          : 'humidity_percent',
-    'Exposure_Duration_hrs' : 'transport_duration_hr',
-    'Cumulative_Damage_Index': 'cumulative_damage_index',
-    'Quality_Remaining_pct' : 'quality_remaining_percent',
-    'Time_to_Spoilage_hrs'  : 'time_to_spoilage_hr',
-    'Spoilage_Risk'         : 'spoilage_risk',
-    'Recommended_Action'    : 'recommended_action',
-    'Delivery_Priority'     : 'delivery_priority',
-    'Product_Type'          : 'product_type',
-    'NH3_ppm'               : 'nh3_ppm',
-    'H2S_ppm'               : 'h2s_ppm',
-    'CO2_ppm'               : 'co2_ppm',
-    'Ethylene_ppm'          : 'ethylene_ppm',
-})
-# Normalise risk labels to lowercase
-df_kaggle['spoilage_risk'] = df_kaggle['spoilage_risk'].str.lower()
-# Fill missing ACM columns
-for col in ['origin_temp_c','max_temp_c','distance_km','vehicle_type',
-            'temp_deviation_degree_hr']:
-    if col not in df_kaggle.columns:
-        df_kaggle[col] = np.nan
-df_kaggle['max_temp_c']    = df_kaggle['avg_temp_c'] + np.random.uniform(1, 3, len(df_kaggle))
-df_kaggle['origin_temp_c'] = df_kaggle['avg_temp_c'] - np.random.uniform(0, 2, len(df_kaggle))
+---
 
-# ── ACM datasets ─────────────────────────────────────────────────────────────
-df_acm_full  = load_excel('/mnt/user-data/uploads/ACM_TRAIN.xlsx', 'intellicold_full_1000_rows.csv')
-df_acm_train = load_excel('/mnt/user-data/uploads/ACM_MAIN.xlsx',  'intellicold_train_800_rows.csv')
-df_acm_test  = load_excel('/mnt/user-data/uploads/ACM_ML.xlsx',    'intellicold_test_200_rows.csv')
+## ▶️ Run the Project
 
-print(f"[2] ACM Full (train+val)    : {len(df_acm_full):>5} rows  |  {len(df_acm_full.columns)} cols")
-print(f"[3] ACM Main (train split)  : {len(df_acm_train):>5} rows  |  {len(df_acm_train.columns)} cols")
-print(f"[4] ACM Test (held-out)     : {len(df_acm_test):>5} rows  |  {len(df_acm_test.columns)} cols")
+### Backend
+```powershell
+cd backend
+python app.py
+```
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 2. MERGE & UNIFY SCHEMA
-# ─────────────────────────────────────────────────────────────────────────────
+This starts the FastAPI backend (default: http://localhost:5000).
 
-COMMON_COLS = [
-    'product_type', 'avg_temp_c', 'max_temp_c', 'origin_temp_c',
-    'humidity_percent', 'transport_duration_hr', 'distance_km',
-    'vehicle_type', 'nh3_ppm', 'h2s_ppm', 'co2_ppm', 'ethylene_ppm',
-    'temp_deviation_degree_hr', 'cumulative_damage_index',
-    'quality_remaining_percent', 'time_to_spoilage_hr',
-    'spoilage_risk', 'recommended_action',
-]
+### Frontend
+```powershell
+cd frontend
+npm start
+```
 
-def harmonize(df):
-    for col in COMMON_COLS:
-        if col not in df.columns:
-            df[col] = np.nan
-    df['spoilage_risk']     = df['spoilage_risk'].astype(str).str.lower().str.strip()
-    df['recommended_action']= df['recommended_action'].astype(str).str.strip()
-    df['product_type']      = df['product_type'].astype(str).str.lower().str.strip()
-    return df[COMMON_COLS].copy()
+Then open http://localhost:3000 in your browser.
 
-# Training corpus = KAGGLE + ACM_FULL + ACM_MAIN  (deduplicated on features)
-df_train = pd.concat([
-    harmonize(df_kaggle),
-    harmonize(df_acm_full),
-    harmonize(df_acm_train),
-], ignore_index=True).drop_duplicates()
+---
 
-df_test  = harmonize(df_acm_test)
+## 🧠 ML Models
 
-print(f"\n[COMBINED] Train corpus     : {len(df_train):>5} rows")
-print(f"[COMBINED] Test set         : {len(df_test):>5} rows")
+Model artifacts are stored under:
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 3. FEATURE ENGINEERING
-# ─────────────────────────────────────────────────────────────────────────────
+- `backend/ml_model/models/`
 
-def engineer_features(df):
-    df = df.copy()
+> **Note:** Large `.pkl` files are tracked via **Git LFS**. If you clone the repo, ensure Git LFS is installed and run: `git lfs pull`.
 
-    # Numeric conversions
-    num_cols = ['avg_temp_c','max_temp_c','origin_temp_c','humidity_percent',
-                'transport_duration_hr','distance_km','nh3_ppm','h2s_ppm',
-                'co2_ppm','ethylene_ppm','temp_deviation_degree_hr',
-                'cumulative_damage_index']
-    for c in num_cols:
-        df[c] = pd.to_numeric(df[c], errors='coerce')
+---
 
-    # Derived features
-    df['temp_range']        = df['max_temp_c'] - df['avg_temp_c']
-    df['temp_excess']       = (df['avg_temp_c'] - 4).clip(lower=0)   # degrees above safe (4°C)
-    df['speed_kmph']        = df['distance_km'] / df['transport_duration_hr'].replace(0, np.nan)
-    df['gas_stress_index']  = df['nh3_ppm'] * 0.4 + df['h2s_ppm'] * 2 + df['ethylene_ppm'] * 0.1
-    df['thermal_load']      = df['temp_deviation_degree_hr'] * df['humidity_percent'] / 100
-    df['distance_per_temp'] = df['distance_km'] / (df['avg_temp_c'].abs() + 1)
+## 📂 Repo Structure (High Level)
 
-    # Encode categoricals
-    vehicle_map  = {'reefer_truck': 0, 'insulated_van': 1, 'open_truck': 2}
-    product_map  = {'milk': 0, 'meat': 1, 'seafood': 2, 'fish': 2,
-                    'vaccine': 3, 'yogurt': 0, 'fruit': 4, 'vegetable': 5}
-    df['vehicle_enc']  = df['vehicle_type'].map(vehicle_map).fillna(1)
-    df['product_enc']  = df['product_type'].map(product_map).fillna(4)
+- `backend/` – Python API + ML inference code
+- `frontend/` – React dashboard UI
+- `hardware/` – ESP32 firmware (sensor data ingestion)
 
-    return df
+---
 
-df_train = engineer_features(df_train)
-df_test  = engineer_features(df_test)
+## 🧪 Training / Model Updates
 
-# ── Feature columns used by models ───────────────────────────────────────────
-FEATURES = [
-    'avg_temp_c', 'max_temp_c', 'origin_temp_c',
-    'humidity_percent', 'transport_duration_hr', 'distance_km',
-    'nh3_ppm', 'h2s_ppm', 'co2_ppm', 'ethylene_ppm',
-    'temp_deviation_degree_hr', 'cumulative_damage_index',
-    'temp_range', 'temp_excess', 'speed_kmph',
-    'gas_stress_index', 'thermal_load', 'distance_per_temp',
-    'vehicle_enc', 'product_enc',
-]
+The training pipeline is located in the backend and can be re-run to update the model artifacts.
 
-X_train = df_train[FEATURES]
-X_test  = df_test[FEATURES]
+> Note: some training scripts may expect data files that are not included in the repo (due to file size / licensing).
 
-# ── Target encoders ───────────────────────────────────────────────────────────
+---
 
-# Risk encoder  (Low=0, Medium=1, High=2, Critical=3)
-RISK_ORDER = {'low': 0, 'medium': 1, 'high': 2, 'critical': 3}
-y_risk_train = df_train['spoilage_risk'].map(RISK_ORDER).fillna(1).astype(int)
-y_risk_test  = df_test['spoilage_risk'].map(RISK_ORDER).fillna(1).astype(int)
+## ✅ Tips
 
-# Quality remaining %
-y_qual_train = pd.to_numeric(df_train['quality_remaining_percent'], errors='coerce').fillna(50)
-y_qual_test  = pd.to_numeric(df_test['quality_remaining_percent'],  errors='coerce').fillna(50)
+- If you get `413 Payload Too Large` or related errors, the model files may need to be regenerated or excluded.
+- Keep large binary models in `backend/ml_model/models/` and use Git LFS as already configured.
 
-# Time to spoilage (hrs)
-y_time_train = pd.to_numeric(df_train['time_to_spoilage_hr'], errors='coerce').fillna(24)
-y_time_test  = pd.to_numeric(df_test['time_to_spoilage_hr'],  errors='coerce').fillna(24)
+---
 
-# Action encoder
-action_le = LabelEncoder()
-y_action_train = action_le.fit_transform(df_train['recommended_action'].fillna('maintain_cooling'))
-y_action_test  = action_le.transform(
-    df_test['recommended_action'].fillna('maintain_cooling').map(
-        lambda x: x if x in action_le.classes_ else 'maintain_cooling'
-    )
-)
-
-print("\n" + "=" * 65)
-print("  Target Class Distributions (Train)")
-print("=" * 65)
+Happy building! 🚚❄️
 risk_counts = y_risk_train.value_counts().sort_index()
 for k, v in RISK_ORDER.items():
     print(f"  Risk {k.capitalize():<10}: {risk_counts.get(v, 0):>5} samples")
